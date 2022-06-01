@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"context"
+	yc "github.com/ydb-platform/ydb-go-yc"
 )
 
 const (
@@ -30,7 +31,20 @@ type Info struct {
 	Price uint32
 }
 
+type Response struct {
+	StatusCode int         `json:"statusCode"`
+	Body       interface{} `json:"body"`
+}
+
 func main() {
+	ctx := context.Background()
+	_, err := Handler(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Handler(ctx context.Context) (*Response, error) {
 	content := getLinkContent()
 	data := parseContent(content)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -42,6 +56,11 @@ func main() {
 
 	createTables(db, ctx)
 	insertData(db, ctx, data)
+
+	return &Response{
+		StatusCode: 200,
+		Body:       "OK",
+	}, nil
 }
 
 func parseContent(content string) []Info {
@@ -120,10 +139,11 @@ func getLinkContent() string {
 func initializeDatabase(ctx context.Context) ydb.Connection {
 	db, err := ydb.Open(
 		ctx,
-		"grpc://localhost:2136/?database=/local",
-		//yc.WithInternalCA(),
-		//yc.WithServiceAccountKeyFileCredentials(".pk"),
-		ydb.WithAnonymousCredentials(),
+		"grpcs://ydb.serverless.yandexcloud.net:2135/?database=/ru-central1/b1gismdbbpt0a6u6siv9/etn159kbte5q3m3c2qv1",
+		//"grpc://localhost:2136/?database=/local",
+		yc.WithInternalCA(),
+		yc.WithServiceAccountKeyFileCredentials("key.json"),
+		//ydb.WithAnonymousCredentials(),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -202,7 +222,7 @@ func insertData(db ydb.Connection, ctx context.Context, data []Info) {
 				ctx,
 				txc,
 				render(myWriteQuery, templateConfig{
-					TablePathPrefix: "/local",
+					TablePathPrefix: db.Name(),
 				}),
 				params,
 			)

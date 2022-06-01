@@ -6,12 +6,16 @@ require (
 	github.com/anaskhan96/soup v1.2.5
 	github.com/google/uuid v1.1.2
 	github.com/ydb-platform/ydb-go-sdk/v3 v3.26.8
+	github.com/ydb-platform/ydb-go-yc v0.9.0
 )
 
 require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
+	github.com/yandex-cloud/go-genproto v0.0.0-20211115083454-9ca41db5ed9e // indirect
 	github.com/ydb-platform/ydb-go-genproto v0.0.0-20220531094121-36ca6bddb9f7 // indirect
+	github.com/ydb-platform/ydb-go-yc-metadata v0.5.2 // indirect
 	golang.org/x/net v0.0.0-20220420153159-1850ba15e1be // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect

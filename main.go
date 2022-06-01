@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/anaskhan96/soup"
 	"github.com/google/uuid"
 	"github.com/ydb-platform/ydb-go-sdk/v3"
@@ -14,6 +15,7 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -65,6 +67,12 @@ func Handler(ctx context.Context) (*Response, error) {
 
 func parseContent(content string) []Info {
 	doc := soup.HTMLParse(content)
+
+	cityElement := doc.Find("button", "class", "MainHeader__open-text")
+	city := cityElement.FullText()
+	city = strings.Trim(city, " \n")
+	fmt.Printf("%v", city)
+
 	products := doc.FindAll("div", "class", "ProductCardVerticalLayout")
 	var result []Info
 	for _, product := range products {
@@ -122,7 +130,27 @@ func (info *Info) parsePrice(price string) {
 }
 
 func getLinkContent() string {
-	resp, err := http.Get(LinkToParse)
+	var client http.Client
+	req, _ := http.NewRequest("GET", LinkToParse, nil)
+	req.AddCookie(&http.Cookie{
+		Name:   "_space",
+		Value:  "chlb_cl:",
+		MaxAge: 300,
+	})
+
+	req.AddCookie(&http.Cookie{
+		Name:   "_dy_df_geo",
+		Value:  "Russia..Chelyabinsk",
+		MaxAge: 300,
+	})
+
+	req.AddCookie(&http.Cookie{
+		Name:   "_dy_df_geo",
+		Value:  "RU.EU.RU_CHE.RU_CHE_Chelyabinsk",
+		MaxAge: 300,
+	})
+
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -131,7 +159,7 @@ func getLinkContent() string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	//Convert the body to type string
+
 	sb := string(body)
 	return sb
 }
